@@ -1,7 +1,7 @@
 # Problem Set 4A
-# Name: <your name here>
+# Name: Jakir Hasan
 # Collaborators:
-# Time Spent: x:xx
+# Time Spent: 1:30
 
 def get_permutations(sequence):
     '''
@@ -22,19 +22,55 @@ def get_permutations(sequence):
     Note: depending on your implementation, you may return the permutations in
     a different order than what is listed here.
     '''
-
-    pass #delete this line and replace with your code here
+    # L: list
+    L = []
+   
+    if len(sequence) == 1:
+        L.append(sequence)
+        return L
+    else:
+        first_letter = sequence[0]
+        permutation_list = get_permutations(sequence[1:])
+        
+        # temp_list (list): stores all possible permutations
+        temp_list = []
+        
+        for word in permutation_list:
+            for i in range(len(word)+1):
+                new_word = word[:i] + first_letter + word[i:]
+                temp_list.append(new_word)
+                     
+        return temp_list
 
 if __name__ == '__main__':
-#    #EXAMPLE
-#    example_input = 'abc'
-#    print('Input:', example_input)
-#    print('Expected Output:', ['abc', 'acb', 'bac', 'bca', 'cab', 'cba'])
-#    print('Actual Output:', get_permutations(example_input))
+    # #EXAMPLE
+    # example_input = 'abc'
+    # print('Input:', example_input)
+    # print('Expected Output:', ['abc', 'acb', 'bac', 'bca', 'cab', 'cba'])
+    # print('Actual Output:', get_permutations(example_input))
     
-#    # Put three example test cases here (for your sanity, limit your inputs
-#    to be three characters or fewer as you will have n! permutations for a 
-#    sequence of length n)
+    # # Put three example test cases here (for your sanity, limit your inputs
+    # to be three characters or fewer as you will have n! permutations for a 
+    # sequence of length n)
 
-    pass #delete this line and replace with your code here
+    example_input = 'ox'
+    print('Input:', example_input)
+    print('Expected Output:', ['ox', 'xo'])
+    print('Actual Output:', get_permutations(example_input))
+    print()
+    
+    example_input = '123'
+    print('Input:', example_input)
+    print('Expected Output:', ['hen', 'ehn', 'enh', 'hne', 'nhe', 'neh'])
+    print('Actual Output:', get_permutations(example_input))
+    print()
+    
+    example_input = 'fox'
+    print('Input:', example_input)
+    print('Expected Output:', ['fox', 'ofx', 'oxf', 'fxo', 'xfo', 'xof'])
+    print('Actual Output:', get_permutations(example_input))
+
+
+
+
 
