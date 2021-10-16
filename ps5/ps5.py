@@ -1,7 +1,7 @@
 # 6.0001/6.00 Problem Set 5 - RSS Feed Filter
-# Name:
-# Collaborators:
-# Time:
+# Name: Jakir Hasan
+# Collaborators: N/A
+# Time: 8 days
 
 import feedparser
 import string
@@ -58,6 +58,16 @@ def process(url):
 class NewsStory(object):
     
     def __init__(self, guid, title, description, link, pubdate):
+        """
+        Initializes a NewsStory object.
+        
+        guid: Globally unique identifier
+        title (str): Title of the news story
+        description (str): Description of the news story
+        link: Links which are present in the news story
+        pubdate (datetime): Publication date and time of the news story
+
+        """
         self.guid = guid
         self.title = title
         self.description = description
@@ -65,18 +75,40 @@ class NewsStory(object):
         self.pubdate = pubdate
         
     def get_guid(self):
+        """
+        Returns globally unique identifier.
+        
+        """
         return self.guid
     
     def get_title(self):
+        """
+        Returns title 
+        title (str)
+        """
         return self.title
     
     def get_description(self):
+        """
+        Returns description
+        description (str)
+
+        """
         return self.description
     
     def get_link(self):
+        """
+        Return link
+
+        """
         return self.link
     
     def get_pubdate(self):
+        """
+        Returns publication date and time.
+        pubdate (datetime)
+
+        """
         return self.pubdate
 
 #======================
@@ -100,19 +132,37 @@ class Trigger(object):
 class PhraseTrigger(Trigger):
     
     def __init__(self, phrase):
+        """
+        Initializes a TitleTrigger object.
+        phrase (str)
+
+        """
         self.phrase = phrase
         
     def get_phrase(self):
+        """
+        Returns phrase.
+        phrase (str)
+
+        """
         return self.phrase
         
     def is_phrase_in(self, text):
+        """
+        Returns True if the phrase is present in the text and False
+        otherwise.
+        text (str): textual description
+
+        """
         
         phrase = self.get_phrase()
         phrase = phrase.lower()
         phrase_list = phrase.split()
         
         text = text.lower()
+        # punctuations (str): all punctuations
         punctuations = string.punctuation
+        # text_without_punc (str): text without punctuations
         text_without_punc = ""
         
         for char in text:
@@ -121,16 +171,16 @@ class PhraseTrigger(Trigger):
             else:
                 text_without_punc += char
         
+        # word_list (list)
         word_list = text_without_punc.split()
-        # clean_text = " ".join(word_list)
-        
-        # return phrase in clean_text
+
         i = 0
         found = False
         
         while i < len(word_list):
             j = 0
             k = i
+            # match (int): total number of match words in phrase_list and word_list
             match = 0
             
             while(j < len(phrase_list) and k < len(word_list)):
@@ -142,7 +192,7 @@ class PhraseTrigger(Trigger):
                     break
             
             if match == len(phrase_list):
-                # print("match:", match)
+                
                 found = True
                 break
             i += 1
@@ -155,13 +205,18 @@ class PhraseTrigger(Trigger):
 class TitleTrigger(PhraseTrigger):
     
     def __init__(self, phrase):
+        """
+        Initializes a TitleTrigger object by calling it's parent class
+        phrase (str)
+        """
         PhraseTrigger.__init__(self, phrase)
         
-    # def get_phrase(self):
-    #     return self.phrase
     
     def evaluate(self, story):
-        # print(story)
+        """
+        Returns True if the title is in the title section of the story and False otherwise
+        story (NewStory)
+        """
         return self.is_phrase_in(story.get_title())
 
 # Problem 4
@@ -170,13 +225,19 @@ class TitleTrigger(PhraseTrigger):
 class DescriptionTrigger(PhraseTrigger):
     
     def __init__(self, phrase):
+        """
+        Initializes a DescriptionTrigger object by calling it's parent class
+        phrase (str)
+        """
         PhraseTrigger.__init__(self, phrase)
         
-    # def get_phrase(self):
-    #     return self.phrase
     
     def evaluate(self, story):
-        # print(story)
+        """
+        Returns True if the phrase is present in the description of the story
+        story (NewsStory)
+
+        """
         return self.is_phrase_in(story.get_description())
 
 # TIME TRIGGERS
@@ -189,10 +250,19 @@ class DescriptionTrigger(PhraseTrigger):
 
 class TimeTrigger(Trigger):
     def __init__(self, datetime_string):
+        """
+        Initializes a TimeTrigger object.
+        datetime_string (str): string representation of datetime in EST format.
+
+        """
+        # format (str): format of given datetime
         format = "%d %b %Y %H:%M:%S"
         
+        # now (datetime): converting the given datetime string into datetime
+        # object
         now = datetime.strptime(datetime_string, format)
         
+        # replacing datetime in EST format
         now = now.replace(tzinfo=pytz.timezone("EST"))
         
         self.triggered_time = now
@@ -202,31 +272,63 @@ class TimeTrigger(Trigger):
 
 class BeforeTrigger(TimeTrigger):
     def __init__(self, datetime_string):
+        """
+        Initializes a BeforeTrigger object.
+        datetime_string (str)
+
+        """
         TimeTrigger.__init__(self, datetime_string)
         
     def get_triggered_time(self):
+        """
+        Returns triggered time
+
+        """
         return self.triggered_time
     
     def evaluate(self, story):
-        # pubdate = story.get_pubdate()
+        """
+        Returns True if the story is published before the triggered time and
+        False otherwise.
+        story (NewsStory)
+
+        """
+        # now (datetime): publication time of story
         now = story.get_pubdate()
+        # converting datetime in EST format
         now = now.replace(tzinfo=pytz.timezone("EST"))
         
         pubdate = now
+        # triggered_time (datetime): triggered time
         triggered_time = self.get_triggered_time()
         
         return pubdate < triggered_time
 
 
 class AfterTrigger(TimeTrigger):
+    
     def __init__(self, datetime_string):
+        """
+        Initializes an AfterTrigger object.
+        datetime_string (datetime)
+
+        """
         TimeTrigger.__init__(self, datetime_string)
         
     def get_triggered_time(self):
+        """
+        Return triggered time.
+
+        """
         return self.triggered_time
     
     def evaluate(self, story):
-        # pubdate = story.get_pubdate()
+        """
+        Returns True if the story is published after the triggered time and
+        False otherwise.
+        story (NewsStory)
+
+        """
         now = story.get_pubdate()
         now = now.replace(tzinfo=pytz.timezone("EST"))
         
@@ -247,15 +349,29 @@ class AfterTrigger(TimeTrigger):
 class NotTrigger(Trigger):
     
     def __init__(self, other_trigger):
+        """
+        Initializes a NotTrigger object.
+        other_trigger (Trigger object)
+
+        """
         self.other_trigger = other_trigger
         
     def get_other_trigger(self):
+        """
+        Returns other trigger.
+
+        """
         return self.other_trigger
     
     
     
     def evaluate(self, story):
-       
+        """
+        Return True if the other trigger does not fire
+        for the story
+        story (NewsStory)
+
+        """
         other_trigger = self.get_other_trigger()
         
         return not other_trigger.evaluate(story)
@@ -265,16 +381,33 @@ class NotTrigger(Trigger):
 class AndTrigger(Trigger):
     
     def __init__(self, trigger1, trigger2):
+        """
+        Initializes an AndTrigger object
+        trigger1 (Trigger object)
+        trigger2 (Trigger objec)
+
+        """
         self.trigger1 = trigger1
         self.trigger2 = trigger2
         
     def get_trigger1(self):
+        """
+        Returns trigger1
+
+        """
         return self.trigger1
     
     def get_trigger2(self):
+        """
+        Returns trigger2
+
+        """
         return self.trigger2
     
     def evaluate(self, story):
+        """
+        Returns True if both of the triggers fires for the story and False otherwise
+        """
         trigger1 = self.get_trigger1()
         trigger2 = self.get_trigger2()
         
@@ -286,6 +419,12 @@ class AndTrigger(Trigger):
 class OrTrigger(Trigger):
     
     def __init__(self, trigger1, trigger2):
+        """
+        Initializes an OrTrigger object
+        trigger1 (Trigger object)
+        trigger2 (Trigger objec)
+
+        """
         self.trigger1 = trigger1
         self.trigger2 = trigger2
         
@@ -296,6 +435,9 @@ class OrTrigger(Trigger):
         return self.trigger2
     
     def evaluate(self, story):
+        """
+        Returns True if either one of the triggers or both fires for the story and False otherwise
+        """
         trigger1 = self.get_trigger1()
         trigger2 = self.get_trigger2()
         
@@ -315,7 +457,18 @@ def filter_stories(stories, triggerlist):
     # TODO: Problem 10
     # This is a placeholder
     # (we're just returning all the stories, with no filtering)
-    return stories
+    
+    # triggered_stories (list): list of stories for which trigger fires
+    triggered_stories = []
+    for story in stories:
+        for trigger in triggerlist:
+            
+            if trigger.evaluate(story):
+                triggered_stories.append(story)
+                break
+            
+    return triggered_stories
+    
 
 
 
@@ -342,8 +495,60 @@ def read_trigger_config(filename):
     # TODO: Problem 11
     # line is the list of lines that you need to parse and for which you need
     # to build triggers
+    
+    # trigger_list (list): list of triggers 
+    trigger_list = []
+    
+    # triggers (dict)
+    triggers = {}
+    for line in lines:
+        # word_list (list)
+        word_list = line.split(",")
+        
+        if word_list[0] == "ADD":
+           
+            for i in range(1, len(word_list)):
+                name = word_list[i]
+                # adding trigger in the trigger list
+                trigger_list.append(triggers[name])
+        else:
+            key = word_list[0]
+            # creating different triggers object and storing them in triggers dictionary
+            
+            if word_list[1] == "TITLE":
+                title = word_list[2]
+                triggers[key] = TitleTrigger(title)
+                
+            elif word_list[1] == "DESCRIPTION":
+                description = word_list[2]
+                triggers[key] = DescriptionTrigger(description)
+                
+            elif word_list[1] == "AFTER":
+                datetime_str = word_list[2]
+                
+                triggers[key] = AfterTrigger(datetime_str)
+                
+            elif word_list[1] == "BEFORE":
+                datetime_str = word_list[2]
+                triggers[key] = BeforeTrigger(datetime_str)
+                
+            elif word_list[1] == "NOT":
+                element = word_list[2]
+                other_trigger = triggers[element]
+                triggers[key] = NotTrigger(other_trigger)
 
-    print(lines) # for now, print it so you see what it contains!
+            elif word_list[1] == "AND":
+                trigger1 = triggers[word_list[2]]
+                trigger2 = triggers[word_list[3]]
+                triggers[key] = AndTrigger(trigger1, trigger2)
+                
+            elif word_list[1] == "OR":
+                trigger1 = triggers[word_list[2]]
+                trigger2 = triggers[word_list[3]]
+                triggers[key] = OrTrigger(trigger1, trigger2)
+                
+        
+    return trigger_list
 
 
 
@@ -353,15 +558,15 @@ def main_thread(master):
     # A sample trigger list - you might need to change the phrases to correspond
     # to what is currently in the news
     try:
-        t1 = TitleTrigger("election")
-        t2 = DescriptionTrigger("Trump")
-        t3 = DescriptionTrigger("Clinton")
+        t1 = TitleTrigger("Biden")
+        t2 = DescriptionTrigger("unvaccinated")
+        t3 = DescriptionTrigger("work")
         t4 = AndTrigger(t2, t3)
         triggerlist = [t1, t4]
 
         # Problem 11
         # TODO: After implementing read_trigger_config, uncomment this line 
-        # triggerlist = read_trigger_config('triggers.txt')
+        triggerlist = read_trigger_config('triggers.txt')
         
         # HELPER CODE - you don't need to understand this!
         # Draws the popup window that displays the filtered stories
@@ -397,7 +602,7 @@ def main_thread(master):
             stories = process("http://news.google.com/news?output=rss")
 
             # Get stories from Yahoo's Top Stories RSS news feed
-            stories.extend(process("http://news.yahoo.com/rss/topstories"))
+            # stories.extend(process("http://news.yahoo.com/rss/topstories"))
 
             stories = filter_stories(stories, triggerlist)
 
@@ -418,6 +623,4 @@ if __name__ == '__main__':
     t = threading.Thread(target=main_thread, args=(root,))
     t.start()
     root.mainloop()
-
-   
 
